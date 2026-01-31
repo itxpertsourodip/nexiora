@@ -2,21 +2,20 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
-function Admin() {
+function AdminPanel() {
   const [orders, setOrders] = useState([]);
 
-  // অর্ডার লোড করা
+  // ১. অর্ডার লোড করা (লাইভ সার্ভার থেকে)
   useEffect(() => {
-    axios.get('http://localhost:5000/api/orders/all')
+    axios.get('https://nexiora-1uzr.onrender.com/api/orders/all')
       .then(res => setOrders(res.data))
       .catch(err => console.log(err));
   }, []);
 
-  // স্ট্যাটাস চেঞ্জ করার ফাংশন
+  // ২. স্ট্যাটাস আপডেট করা
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/orders/update/${id}`, { status: newStatus });
-      // সাথে সাথে স্ক্রিনেও আপডেট দেখাবে
+      await axios.put(`https://nexiora-1uzr.onrender.com/api/orders/update/${id}`, { status: newStatus });
       setOrders(orders.map(order => order._id === id ? { ...order, status: newStatus } : order));
       alert('✅ স্ট্যাটাস আপডেট হয়েছে!');
     } catch (error) {
@@ -63,7 +62,6 @@ function Admin() {
                  </a>
               </td>
               <td style={{ padding: '10px' }}>
-                {/* স্ট্যাটাস ড্রপডাউন */}
                 <select 
                     value={order.status} 
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
@@ -88,4 +86,4 @@ function Admin() {
   );
 }
 
-export default Admin;
+export default AdminPanel;

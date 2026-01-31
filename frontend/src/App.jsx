@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import AdminPanel from './AdminPanel';
-import Login from './Login'; // লগইন পেজ ইম্পোর্ট
+import AdminPanel from './AdminPanel'; // নাম আপডেট করা হয়েছে
+import Login from './Login';
 import './App.css';
 
-// ১. কাস্টমার অর্ডার ফর্ম (আগেরটাই আছে)
+// ১. কাস্টমার অর্ডার ফর্ম
 function OrderForm() {
   const [formData, setFormData] = useState({
     customerName: '', phone: '', address: '', fileLink: '',
@@ -23,14 +23,17 @@ function OrderForm() {
         items: [{ productName: formData.productName, quantity: Number(formData.quantity), price: Number(formData.price) }],
         totalAmount: Number(formData.price) + 50, deliveryCharge: 50
       };
-      await axios.post('http://localhost:5000/api/orders/add', orderData);
+      
+      // 👇 এখানে আপনার লাইভ সার্ভার লিংক বসানো হয়েছে
+      await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
+      
       alert('✅ অর্ডার সফল হয়েছে!');
-    } catch (error) { alert('❌ অর্ডার হয়নি!'); }
+    } catch (error) { alert('❌ অর্ডার হয়নি! ইন্টারনেট কানেকশন চেক করুন।'); }
   };
 
   return (
     <div className="container">
-      <h1>🖨️ Printing Master</h1>
+      <h1>🖨️ Nexiora Printing Service</h1>
       <form onSubmit={handleSubmit}>
         <input type="text" name="customerName" placeholder="আপনার নাম" onChange={handleChange} required />
         <input type="text" name="phone" placeholder="মোবাইল নম্বর" onChange={handleChange} required />
@@ -53,11 +56,10 @@ function OrderForm() {
   );
 }
 
-// ২. সিকিউরড অ্যাডমিন রুট (মেইন অ্যাপ)
+// ২. মেইন অ্যাপ (রাউটিং + সিকিউরিটি)
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // পেজ রিফ্রেশ দিলেও যেন লগইন থাকে
   useEffect(() => {
     const loggedInUser = localStorage.getItem('printAdmin');
     if (loggedInUser) {
@@ -69,13 +71,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<OrderForm />} />
-        
-        {/* এখানে লজিক বসালাম: লগইন করা থাকলে Admin দেখাবে, না থাকলে Login পেজ দেখাবে */}
-        // আগে ছিল <Admin /> এখন হবে <AdminPanel />
-<Route 
-  path="/admin" 
-  element={isLoggedIn ? <AdminPanel /> : <Login setIsLoggedIn={setIsLoggedIn} />} 
-/>
+        <Route 
+          path="/admin" 
+          element={isLoggedIn ? <AdminPanel /> : <Login setIsLoggedIn={setIsLoggedIn} />} 
+        />
       </Routes>
     </BrowserRouter>
   );
