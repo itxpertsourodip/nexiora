@@ -5,78 +5,70 @@ import './App.css';
 function AdminPanel() {
   const [orders, setOrders] = useState([]);
 
-  // ১. অর্ডার লোড করা (লাইভ সার্ভার থেকে)
   useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = () => {
     axios.get('https://nexiora-1uzr.onrender.com/api/orders/all')
       .then(res => setOrders(res.data))
       .catch(err => console.log(err));
-  }, []);
+  };
 
-  // ২. স্ট্যাটাস আপডেট করা
   const handleStatusChange = async (id, newStatus) => {
     try {
       await axios.put(`https://nexiora-1uzr.onrender.com/api/orders/update/${id}`, { status: newStatus });
       setOrders(orders.map(order => order._id === id ? { ...order, status: newStatus } : order));
-      alert('✅ স্ট্যাটাস আপডেট হয়েছে!');
-    } catch (error) {
-      alert('❌ আপডেট হয়নি!');
+    } catch (error) { alert('Update failed!'); }
+  };
+
+  const deleteOrder = async (id) => {
+    if(window.confirm("অর্ডারটি ডিলিট করতে চান?")) {
+      try {
+        await axios.delete(`https://nexiora-1uzr.onrender.com/api/orders/delete/${id}`);
+        setOrders(orders.filter(order => order._id !== id));
+        alert("অর্ডার ডিলিট হয়েছে!");
+      } catch (error) { alert("ডিলিট করা যায়নি!"); }
     }
   };
 
-  const getStatusColor = (status) => {
-    if (status === 'Pending') return 'orange';
-    if (status === 'Printing') return 'blue';
-    if (status === 'Delivered') return 'green';
-    return 'black';
+  const handleLogout = () => {
+    localStorage.removeItem('printAdmin');
+    window.location.href = '/admin';
   };
 
   return (
-    <div className="container" style={{ maxWidth: '900px' }}>
-      <h1>👨‍💼 Admin Dashboard ({orders.length})</h1>
+    <div className="container" style={{ maxWidth: '1000px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>👨‍💼 Admin Dashboard</h1>
+        <button onClick={handleLogout} style={{ background: '#ff4d4d', padding: '10px' }}>Logout</button>
+      </div>
       
       <table border="1" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
-          <tr style={{ background: '#eee', height: '40px' }}>
+          <tr style={{ background: '#eee' }}>
             <th>Customer</th>
-            <th>Item Details</th>
+            <th>Details</th>
             <th>File</th>
-            <th>Status Action</th>
+            <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order._id} style={{ textAlign: 'center' }}>
-              <td style={{ padding: '10px' }}>
-                <b>{order.customerName}</b><br/>
-                <small>{order.phone}</small><br/>
-                <small style={{color: '#777'}}>{order.address}</small>
-              </td>
-              <td style={{ padding: '10px' }}>
-                {order.items[0].productName}<br/>
-                <small>Qty: {order.items[0].quantity} | Price: {order.totalAmount}৳</small>
-              </td>
-              <td style={{ padding: '10px' }}>
-                 <a href={order.fileLink} target="_blank" rel="noreferrer" 
-                    style={{background: '#333', color: 'white', padding: '5px 10px', borderRadius: '5px', textDecoration: 'none'}}>
-                    📂 View
-                 </a>
-              </td>
-              <td style={{ padding: '10px' }}>
-                <select 
-                    value={order.status} 
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                    style={{ 
-                        fontWeight: 'bold', 
-                        color: getStatusColor(order.status),
-                        padding: '5px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    <option value="Pending">🕒 Pending</option>
-                    <option value="Printing">🖨️ Printing</option>
-                    <option value="Shipped">🚚 Shipped</option>
-                    <option value="Delivered">✅ Delivered</option>
+            <tr key={order._id}>
+              <td>{order.customerName}<br/><small>{order.phone}</small></td>
+              <td>{order.items[0].productName} ({order.items[0].quantity})</td>
+              <td><a href={order.fileLink} target="_blank">📂 View</a></td>
+              <td>
+                <select value={order.status} onChange={(e) => handleStatusChange(order._id, e.target.value)}>
+                    <option value="Pending">Pending</option>
+                    <option value="Printing">Printing</option>
+                    <option value="Delivered">Delivered</option>
                 </select>
+              </td>
+              <td>
+                <button onClick={() => deleteOrder(order._id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>🗑️</button>
               </td>
             </tr>
           ))}

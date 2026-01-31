@@ -48,4 +48,14 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+// ৩. অর্ডার ডিলিট করার রুট
+router.delete('/delete/:id', async (req, res) => {
+    try {
+        await Order.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'Order Deleted!' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;
