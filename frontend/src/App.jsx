@@ -1,12 +1,16 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminPanel from './AdminPanel';
 import Login from './Login';
 import './App.css';
 
+// OrderForm কম্পোনেন্ট আগের মতোই থাকবে... (আমি সংক্ষেপে রাখলাম)
 function OrderForm() {
-  const [formData, setFormData] = useState({
+  // ... আপনার আগের OrderForm কোড ...
+  // (OrderForm এর কোড যা ছিল তাই থাকবে, বদলানোর দরকার নেই)
+  // শুধু নিশ্চিত হোন handleSubmit ফাংশনটি ঠিক আছে।
+   const [formData, setFormData] = useState({
     customerName: '', phone: '', address: '', fileLink: '',
     productName: 'Visiting Card', quantity: 1000, price: 500
   });
@@ -21,23 +25,14 @@ function OrderForm() {
         phone: formData.phone,
         address: formData.address,
         fileLink: formData.fileLink,
-        items: [{ 
-          productName: formData.productName, 
-          quantity: Number(formData.quantity), 
-          price: Number(formData.price) 
-        }],
+        items: [{ productName: formData.productName, quantity: Number(formData.quantity), price: Number(formData.price) }],
         totalAmount: Number(formData.price) + 50,
         deliveryCharge: 50
       };
       
-      console.log("Sending Data:", orderData);
-      // 👇 আপনার লাইভ সার্ভার লিংক
       const response = await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
-      console.log("Success:", response.data);
-      
       alert('✅ অর্ডার সফল হয়েছে!');
     } catch (error) { 
-      console.error("Error Details:", error);
       const errorMsg = error.response?.data?.message || error.message;
       alert('❌ অর্ডার হয়নি! কারণ: ' + errorMsg); 
     }
@@ -71,15 +66,20 @@ function OrderForm() {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // পেজ রিফ্রেশ দিলেও যেন লগইন থাকে
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('printAdmin');
-    if (loggedInUser) setIsLoggedIn(true);
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
   }, []);
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<OrderForm />} />
+        
+        {/* যদি লগইন থাকে তাহলে এডমিন প্যানেল, না থাকলে লগইন পেজ */}
         <Route 
           path="/admin" 
           element={isLoggedIn ? <AdminPanel /> : <Login setIsLoggedIn={setIsLoggedIn} />} 
