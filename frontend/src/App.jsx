@@ -1,11 +1,10 @@
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import AdminPanel from './AdminPanel'; // নাম আপডেট করা হয়েছে
+import AdminPanel from './AdminPanel';
 import Login from './Login';
 import './App.css';
 
-// ১. কাস্টমার অর্ডার ফর্ম
 function OrderForm() {
   const [formData, setFormData] = useState({
     customerName: '', phone: '', address: '', fileLink: '',
@@ -15,31 +14,33 @@ function OrderForm() {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const orderData = {
-      customerName: formData.customerName, phone: formData.phone, address: formData.address,
-      fileLink: formData.fileLink,
-      items: [{ productName: formData.productName, quantity: Number(formData.quantity), price: Number(formData.price) }],
-      totalAmount: Number(formData.price) + 50, deliveryCharge: 50
-    };
-    
-    console.log("Sending Data:", orderData); // ডাটা চেক
-    const response = await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
-    console.log("Server Response:", response.data); // সার্ভার রেসপন্স চেক
-    
-    alert('✅ অর্ডার সফল হয়েছে!');
-  } catch (error) { 
-    console.error("Full Error:", error); // লাল রঙের এরর আসবে কনসোলে
-    alert('❌ অর্ডার হয়নি! এরর: ' + (error.response?.data?.message || error.message)); 
-  }
-};
+    e.preventDefault();
+    try {
+      const orderData = {
+        customerName: formData.customerName,
+        phone: formData.phone,
+        address: formData.address,
+        fileLink: formData.fileLink,
+        items: [{ 
+          productName: formData.productName, 
+          quantity: Number(formData.quantity), 
+          price: Number(formData.price) 
+        }],
+        totalAmount: Number(formData.price) + 50,
+        deliveryCharge: 50
+      };
       
-      // 👇 এখানে আপনার লাইভ সার্ভার লিংক বসানো হয়েছে
-      await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
+      console.log("Sending Data:", orderData);
+      // 👇 আপনার লাইভ সার্ভার লিংক
+      const response = await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
+      console.log("Success:", response.data);
       
       alert('✅ অর্ডার সফল হয়েছে!');
-    } catch (error) { alert('❌ অর্ডার হয়নি! ইন্টারনেট কানেকশন চেক করুন।'); }
+    } catch (error) { 
+      console.error("Error Details:", error);
+      const errorMsg = error.response?.data?.message || error.message;
+      alert('❌ অর্ডার হয়নি! কারণ: ' + errorMsg); 
+    }
   };
 
   return (
@@ -67,15 +68,12 @@ function OrderForm() {
   );
 }
 
-// ২. মেইন অ্যাপ (রাউটিং + সিকিউরিটি)
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem('printAdmin');
-    if (loggedInUser) {
-      setIsLoggedIn(true);
-    }
+    if (loggedInUser) setIsLoggedIn(true);
   }, []);
 
   return (
