@@ -4,31 +4,42 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// লগইন করার রাস্তা (Route)
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        // ১. ইমেইল ও পাসওয়ার্ড থেকে স্পেস (Space) সরিয়ে নেওয়া
+        const email = req.body.email.trim();
+        const password = req.body.password.trim();
 
-        // ১. ইমেইল আছে কি না চেক করা
+        console.log("🔍 Login Attempt for:", email); // লগ ১
+
+        // ২. ইমেইল আছে কি না চেক করা
         const user = await User.findOne({ email });
+        
         if (!user) {
-            return res.status(400).json({ message: "❌ ভুল ইমেইল বা পাসওয়ার্ড!" });
+            console.log("❌ User Not Found in Database!"); // লগ ২
+            return res.status(400).json({ message: "❌ ইমেইলটি ডাটাবেসে নেই!" });
         }
 
-        // ২. পাসওয়ার্ড মিলিয়ে দেখা
+        console.log("✅ User Found:", user.email); // লগ ৩
+        console.log("🔐 Stored Hash:", user.password); // লগ ৪
+
+        // ৩. পাসওয়ার্ড মিলিয়ে দেখা
         const isMatch = await bcrypt.compare(password, user.password);
+        
+        console.log("🤔 Password Match Result:", isMatch); // লগ ৫ (True নাকি False)
+
         if (!isMatch) {
-            return res.status(400).json({ message: "❌ ভুল ইমেইল বা পাসওয়ার্ড!" });
+            console.log("❌ Password did not match!"); 
+            return res.status(400).json({ message: "❌ পাসওয়ার্ড ভুল হয়েছে!" });
         }
 
-        // ৩. সিকিউরিটি টোকেন তৈরি করা (Token)
+        // ৪. টোকেন তৈরি
         const token = jwt.sign(
             { id: user._id, role: user.role }, 
             process.env.JWT_SECRET, 
-            { expiresIn: '1d' } // ১ দিন পর টোকেন এক্সপায়ার হবে
+            { expiresIn: '1d' } 
         );
 
-        // ৪. সফল হলে ইউজারের তথ্য পাঠানো
         res.json({
             message: "✅ লগইন সফল!",
             token,
@@ -36,13 +47,13 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role, // এটা দিয়ে আমরা বুঝব কে মালিক আর কে পার্টনার
+                role: user.role,
                 walletBalance: user.walletBalance
             }
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("🔥 Server Error:", error);
         res.status(500).json({ message: "সার্ভার এরর!" });
     }
 });
