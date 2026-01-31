@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Order = require('../models/Order'); // আমাদের খাতা ইম্পোর্ট করলাম
+const Order = require('../models/Order'); // <--- এই লাইনটি যোগ করুন
+
+// বাকি কোড (router.post, router.get...) আগের মতোই থাকবে।
+// শুধু উপরের "const OrderSchema = ..." অংশটুকু মুছে দেবেন।
+// ...
 
 // নতুন অর্ডার তৈরি করার রাস্তা (Create Order Route)
 router.post('/add', async (req, res) => {
@@ -58,4 +62,15 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
+// ৪. অর্ডার ডিলিট করার রুট
+router.delete('/delete/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        await Order.findByIdAndDelete(orderId);
+        res.status(200).json({ message: 'অর্ডারটি সফলভাবে ডিলিট করা হয়েছে!' });
+    } catch (error) {
+        console.error("Delete Error:", error);
+        res.status(500).json({ message: 'সার্ভার এরর: ডিলিট করা সম্ভব হয়নি।' });
+    }
+});
 module.exports = router;
