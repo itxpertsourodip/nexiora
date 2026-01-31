@@ -11,11 +11,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// MongoDB কানেকশন
+// MongoDB কানেকশন চেক করার জন্য এই কোডটি দিন
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully!'))
-  .catch((err) => console.log('❌ MongoDB Connection Error:', err));
-
+  .then(() => console.log('✅ MongoDB Connected!'))
+  .catch((err) => {
+    console.log('❌ Connection Error Detail:', err.message);
+  });
+  
 // ২. অর্ডারের রুট সেট করলাম
 // কেউ যদি /api/orders লিংকে নক করে, তাকে orderRoutes এ পাঠানো হবে
 app.use('/api/orders', orderRoutes);

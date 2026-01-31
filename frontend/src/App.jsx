@@ -15,14 +15,25 @@ function OrderForm() {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const orderData = {
-        customerName: formData.customerName, phone: formData.phone, address: formData.address,
-        fileLink: formData.fileLink,
-        items: [{ productName: formData.productName, quantity: Number(formData.quantity), price: Number(formData.price) }],
-        totalAmount: Number(formData.price) + 50, deliveryCharge: 50
-      };
+  e.preventDefault();
+  try {
+    const orderData = {
+      customerName: formData.customerName, phone: formData.phone, address: formData.address,
+      fileLink: formData.fileLink,
+      items: [{ productName: formData.productName, quantity: Number(formData.quantity), price: Number(formData.price) }],
+      totalAmount: Number(formData.price) + 50, deliveryCharge: 50
+    };
+    
+    console.log("Sending Data:", orderData); // ডাটা চেক
+    const response = await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
+    console.log("Server Response:", response.data); // সার্ভার রেসপন্স চেক
+    
+    alert('✅ অর্ডার সফল হয়েছে!');
+  } catch (error) { 
+    console.error("Full Error:", error); // লাল রঙের এরর আসবে কনসোলে
+    alert('❌ অর্ডার হয়নি! এরর: ' + (error.response?.data?.message || error.message)); 
+  }
+};
       
       // 👇 এখানে আপনার লাইভ সার্ভার লিংক বসানো হয়েছে
       await axios.post('https://nexiora-1uzr.onrender.com/api/orders/add', orderData);
