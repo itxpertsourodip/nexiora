@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const orderRoutes = require('./routes/orderRoutes'); // ১. রুট ইম্পোর্ট করলাম
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 const app = express();
@@ -17,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => {
     console.log('❌ Connection Error Detail:', err.message);
   });
-  
+
 // ২. অর্ডারের রুট সেট করলাম
 // কেউ যদি /api/orders লিংকে নক করে, তাকে orderRoutes এ পাঠানো হবে
 app.use('/api/orders', orderRoutes);
